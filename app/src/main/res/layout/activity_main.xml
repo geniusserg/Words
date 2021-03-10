@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <Button
+        android:id="@+id/word"
+        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sample"/>
+
+    <ListView
+        android:id="@+id/list_words"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_above="@id/menu"
+        android:layout_below="@id/word"
+        android:scrollbars="horizontal"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"/>
+
+    <RelativeLayout
+        android:id="@+id/menu"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_margin="16dp"
+>
+        <Button
+            android:id="@+id/new_word"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/new_word"/>
+        <Button
+            android:id="@+id/new_game"
+            android:text="@string/new_game"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_below="@id/check"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/exit"
+            />
+
+        <Button
+            android:id="@+id/check"
+            android:layout_height="wrap_content"
+            android:text="@string/check"
+            android:layout_width="fill_parent"
+            android:layout_below="@id/new_word"
+            />
+
+        <Button
+            android:id="@+id/exit"
+            android:text="@string/exit"
+            android:layout_height="wrap_content"
+            android:layout_width="200dp"
+            android:layout_below="@id/check"
+            android:layout_alignParentEnd="true"
+            android:layout_marginLeft="20dp"
+
+            />
+    </RelativeLayout>
+</RelativeLayout>
