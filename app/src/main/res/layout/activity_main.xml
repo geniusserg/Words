@@ -4,6 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <Button
         android:id="@+id/word"
+        android:textSize="20sp"
         android:layout_margin="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -54,13 +55,13 @@
 
         <Button
             android:id="@+id/exit"
-            android:text="@string/exit"
-            android:layout_height="wrap_content"
             android:layout_width="200dp"
+            android:layout_height="wrap_content"
             android:layout_below="@id/check"
             android:layout_alignParentEnd="true"
             android:layout_marginLeft="20dp"
+            android:backgroundTint="#E33E3E"
 
-            />
+            android:text="@string/exit" />
     </RelativeLayout>
 </RelativeLayout>

@@ -5,6 +5,6 @@
     <string name="check">Check words</string>
     <string name="exit">Exit</string>
     <string name="error">Sorry, application fails. Please contact developers</string>
-    <string name="new_word">New word</string>
+    <string name="new_word">+ new word</string>
     <string name="sample">SAMPLE</string>
 </resources>
