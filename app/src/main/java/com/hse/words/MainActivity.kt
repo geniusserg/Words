@@ -1,14 +1,11 @@
 package com.hse.words
 
-import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.iterator
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.HashMap
@@ -28,24 +25,29 @@ class MainActivity : AppCompatActivity() {
     lateinit var longWordsDictionary: Array<String>
     var longWord: String? = null
     lateinit var newWordAlert: AlertDialog
-    var listWordsView: ListView? = null
+    var listWordsView: TableLayout? = null
+    var loadedState: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //load dictionaries in coroutine
         GlobalScope.launch{
             longWordsDictionary = loadDictionaryAsArray("wordsLong.txt").await()
             update()
-            runOnUiThread { checkButton?.setEnabled(false) }
             dictionary = loadDictionaryAsSet("words.txt").await()
-            runOnUiThread { checkButton?.setEnabled(true) }
+            loadedState = !dictionary.isNullOrEmpty()
+            runOnUiThread({checkButton?.setEnabled(loadedState)})
         }
+
+        //load Views
         setContentView(R.layout.activity_main)
         newWordAlertInit()
         buttonMain = findViewById(R.id.word)
         buttonMain?.setText("Loading...")
         newGame = findViewById(R.id.new_game)
         checkButton = findViewById(R.id.check)
-        checkButton?.setOnClickListener { check() }
+        checkButton?.setOnClickListener { check()
+        checkButton?.setEnabled(false) }
         checkButton?.setEnabled(false)
         newGame?.setEnabled(false)
         newGame?.setOnClickListener { update() }
@@ -57,13 +59,10 @@ class MainActivity : AppCompatActivity() {
         exitButton = findViewById(R.id.exit)
         exitButton?.setOnClickListener { this.finishAndRemoveTask() }
         listWordsView = findViewById(R.id.list_words)
-        listWordsView?.setBackgroundColor(Color.GREEN)
-        val newWTmp  = TextView(this)
-        newWTmp.setText("sdgashjawrhwraywertrwtwrtwerwerwer")
-        newWTmp.setTextColor(Color.WHITE)
-        listWordsView?.addFooterView(newWTmp)
     }
 
+
+    // load new word input dialog
     fun newWordAlertInit(){
         val alert: AlertDialog.Builder = AlertDialog.Builder(this)
         alert.setTitle("New Word")
@@ -87,8 +86,11 @@ class MainActivity : AppCompatActivity() {
         newWordAlert = alert.create()
     }
 
+    // return loaded dictionari as a set from async coroutine result
+    // load from set is needed as search at set is faster
     fun loadDictionaryAsSet(resource: String): Deferred<SortedSet<String>>{
         return GlobalScope.async {
+            runOnUiThread({checkButton?.setEnabled(false)})
             val res = assets.open(resource)
             val resstd = res.bufferedReader().readLines()
             val setOfWords = resstd.toSortedSet()
@@ -105,34 +107,39 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    // check and add new word
     fun newWord(word: String): Boolean{
         when (match(word)){
             true -> {
-                listWords.add(word)
-
+                if (!listWords.contains(word)) {
+                    listWords.add(word)
+                    addWordonBoard(word)
+                }
             }
             false -> return false
         }
         return true
     }
 
+
+    // find new long word
     fun update(){
-        newGame?.setEnabled(false)
-        checkButton?.setEnabled(false)
         listWords.clear()
         listWordsWrong.clear()
+        listWordsView?.removeAllViews()
         score = 0
-        GlobalScope.launch {
-            longWord = loadRandomWord()
-            runOnUiThread({
+        longWord = longWordsDictionary[Random.nextInt(28460)]
+        runOnUiThread({
                 buttonMain?.setText(longWord)
                 newGame?.setEnabled(true)
-                checkButton?.setEnabled(true)
                 newWord?.setEnabled(true)
-            })
-        }
+                checkButton?.isEnabled = loadedState
+        })
     }
 
+
+    //check each word from the list and prepare result
     fun check(){
         newGame?.setEnabled(false);
         checkButton?.setEnabled(false)
@@ -140,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch {
             if (listWords.size != 0) {
                 for (i in listWords) {
-                    if (match(i) && findWord(i)) {
+                    if (match(i) && dictionary.contains(i)) {
                         score += 1
                     } else {
                         listWordsWrong.add(i)
@@ -150,11 +157,13 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread(
                     {
                         newGame?.setEnabled(true)
-                        buttonMain?.setText("YUOR SCORE IS : "+score.toString())
+                        buttonMain?.setText("YOUR SCORE IS : "+score.toString())
+                        markWordsOnBoard()
                     })
         }
     }
 
+    // check that small word is a subset of long word
     fun match(substring: String): Boolean{
         if (substring.equals(longWord)){ return false }
         val cMap = HashMap<Char, Int>()
@@ -177,13 +186,26 @@ class MainActivity : AppCompatActivity() {
         return result.isEmpty()
     }
 
-    fun findWord(word: String): Boolean{
-        return dictionary.contains(word)
+    // add word on TableLayout
+    fun addWordonBoard(string: String){
+        val tview = TextView(this)
+        tview.setText(listWordsView?.childCount?.toString() + " > " + string)
+        tview.setTextSize(20f)
+        listWordsView?.addView(tview)
     }
 
-    fun loadRandomWord() : String{
-        return longWordsDictionary[Random.nextInt(28460)]
+    // if word is wrong - amke it RED, else - GREEN
+    fun markWordsOnBoard(){
+        for (i in (0..listWordsView!!.childCount)){
+            val tr = listWordsView!!.getChildAt(i) as? TextView
+            if (tr != null) {
+                if (listWordsWrong.contains(listWords.removeAt(0))) {
+                    tr.setTextColor(Color.RED)
+                } else {
+                    tr.setTextColor(Color.GREEN)
+                }
+            }
+        }
     }
-
 
 }
